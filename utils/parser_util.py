@@ -22,6 +22,8 @@ def parse_and_load_from_model(parser, model_type, model_path):
         add_semantic_generator_model_options(parser)
     elif model_type == "semantic_regressor":
         add_semantic_regressor_model_options(parser)
+    elif model_type == "motion_classifier":
+        add_motion_classifier_model_options(parser)
     else:
         print(f'Warning: model type {model_type} is unknown.')
 
@@ -100,6 +102,24 @@ def add_data_options(parser):
                        help="If set, no translation will be used.")
 
 
+def add_motion_classifier_model_options(parser):
+    group = parser.add_argument_group('motion_classifier')
+    group.add_argument("--layers", default=8, type=int,
+                       help="Number of layers.")
+    group.add_argument("--heads", default=4, type=int,
+                       help="Number of heads.")
+    group.add_argument("--latent_dim", default=512, type=int,
+                       help="Transformer width.")
+    group.add_argument("--attribute_dim", default=6, type=int,
+                       help="Number of attributes.")
+    group.add_argument("--transformer_feedforward_dim", default=1024, type=int,
+                       help="Transformer width.")
+    group.add_argument("--dropout", default=0.1, type=float,
+                       help="Dropout rate.")
+    group.add_argument("--semantic_pool_type", default='global_max_pool',
+                       choices=['global_avg_pool', 'global_max_pool', 'linear_time_layer'], type=str,
+                       help="Type of pooling to extract the semantic embedding from the semantic encoder output.")
+
 def add_modiffae_model_options(parser):
     group = parser.add_argument_group('modiffae')
     group.add_argument("--layers", default=8, type=int,
@@ -137,6 +157,35 @@ def add_semantic_regressor_model_options(parser):
                        help="Transformer width.")
     group.add_argument("--attribute_dim", default=6, type=int,
                        help="Number of attributes.")
+
+
+def add_motion_classifier_training_options(parser):
+    group = parser.add_argument_group('motion_classifier_training')
+    group.add_argument("--save_dir", required=True, type=str,
+                       help="Path to save checkpoints and results.")
+    group.add_argument("--overwrite", action='store_true',
+                       help="If True, will enable to use an already existing save_dir.")
+    group.add_argument("--lr", default=0.0001, type=float, help="Learning rate.")
+    group.add_argument("--weight_decay", default=0.0, type=float, help="Optimizer weight decay.")
+    group.add_argument("--eval_batch_size", default=32, type=int,
+                       help="Batch size during evaluation loop. Do not change this unless you know what you are doing. "
+                            "T2m precision calculation is based on fixed batch size 32.")
+    group.add_argument("--eval_split", default='test', choices=['val', 'test'], type=str,
+                       help="Which split to evaluate on during training.")
+    group.add_argument("--eval_during_training", action='store_true',
+                       help="If True, will run evaluation during training.")
+    group.add_argument("--eval_rep_times", default=3, type=int,
+                       help="Number of repetitions for evaluation loop during training.")
+    group.add_argument("--eval_num_samples", default=1_000, type=int,
+                       help="If -1, will use all samples in the specified split.")
+    group.add_argument("--log_interval", default=100, type=int,
+                       help="Log losses each N steps")
+    group.add_argument("--save_interval", default=5_000, type=int,
+                       help="Save checkpoints and run evaluation each N steps")
+    group.add_argument("--num_steps", default=500_000, type=int,
+                       help="Training will stop after the specified number of steps.")
+    group.add_argument("--resume_checkpoint", default="", type=str,
+                       help="If not empty, will start from the specified checkpoint (path to model###.pt file).")
 
 
 def add_modiffae_training_options(parser):
@@ -274,6 +323,15 @@ def add_generate_options(parser):
                        help="If True, will overwrite existing generated data.")
 
 
+def motion_classifier_train_args():
+    parser = ArgumentParser()
+    add_base_options(parser)
+    add_data_options(parser)
+    add_motion_classifier_model_options(parser)
+    add_motion_classifier_training_options(parser)
+    return parser.parse_args()
+
+
 def modiffae_train_args():
     parser = ArgumentParser()
     add_base_options(parser)
@@ -362,11 +420,28 @@ def manipulation_quantitative_evaluation_args():
     return parser.parse_args()
 
 
+def manipulation_quantitative_evaluation_with_inception_args():
+    parser = ArgumentParser()
+    add_base_options(parser)
+    add_model_path_option(parser, model_type="modiffae")
+    add_model_path_option(parser, model_type="semantic_regressor")
+    add_model_path_option(parser, model_type="motion_classifier")
+    return parser.parse_args()
+
+
 def regression_evaluation_args():
     parser = ArgumentParser()
     add_base_options(parser)
     add_save_dir_path(parser)
     add_model_path_option(parser, model_type="modiffae")
+    return parser.parse_args()
+
+
+def motion_classifier_evaluation_args():
+    parser = ArgumentParser()
+    add_base_options(parser)
+    add_save_dir_path(parser)
+    #add_model_path_option(parser, model_type="motion_classifier")
     return parser.parse_args()
 
 

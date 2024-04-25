@@ -1,6 +1,7 @@
 from model.modiffae import MoDiffAE
 from model.semantic_generator import SemanticGenerator
 from model.semantic_regressor import SemanticRegressor
+from model.motion_classifier import MotionClassifier
 from diffusion import gaussian_diffusion as gd
 from diffusion.respace import SpacedDiffusion, space_timesteps
 import torch
@@ -51,6 +52,23 @@ def create_semantic_regressor(args, train_data, semantic_encoder):
         semantic_encoder=semantic_encoder,
         cond_mean=cond_mean,
         cond_std=cond_std
+    )
+    return model
+
+
+def create_motion_classifier(args, data):
+    input_feats = data.dataset.num_joints * data.dataset.num_feats
+    model = MotionClassifier(
+        latent_dim=args.latent_dim,
+        num_heads=args.heads,
+        num_layers=args.layers,
+        transformer_feedforward_dim=args.transformer_feedforward_dim,
+        dropout=args.dropout,
+        attribute_dim=args.attribute_dim,
+        pose_rep=args.pose_rep,
+        input_feats=input_feats,
+        num_frames=args.num_frames,
+        semantic_pool_type=args.semantic_pool_type
     )
     return model
 
@@ -116,6 +134,29 @@ def calculate_embeddings(data, semantic_encoder, return_labels=False):
 
         with torch.no_grad():
             emb = semantic_encoder(og_motion)
+        embeddings.append(emb)
+        labels.append(batch_labels)
+    embeddings = torch.cat(embeddings, dim=0)
+    labels = torch.cat(labels, dim=0)
+
+    if return_labels:
+        return embeddings, labels
+    else:
+        return embeddings
+
+
+def calculate_inception_embeddings(data, motion_classifier, return_labels=False):
+    embeddings = []
+    labels = []
+    for motion, cond in data:
+        cond['y'] = {key: val.to(dist_util.dev()) if torch.is_tensor(val) else val for key, val in
+                     cond['y'].items()}
+        og_motion = cond['y']['original_motion']
+        batch_labels = cond['y']['labels']
+        batch_labels = batch_labels.squeeze()
+
+        with torch.no_grad():
+            emb = motion_classifier.create_embedding(og_motion)
         embeddings.append(emb)
         labels.append(batch_labels)
     embeddings = torch.cat(embeddings, dim=0)
