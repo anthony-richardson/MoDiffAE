@@ -89,8 +89,10 @@ def main():
     colors = cycle(cm.tab10.colors)
 
     f = plt.figure()
-    f.set_figwidth(20)
-    f.set_figheight(15)
+    f.set_figwidth(16)
+    f.set_figheight(8)
+    #f.set_figwidth(15)
+    #f.set_figheight(10)
 
     plt.rc('font', size=23)
 
@@ -105,7 +107,14 @@ def main():
             label=technique_class_to_name[i]
         )
     plt.gca().set_aspect('equal', 'datalim')
+    plt.rc('legend', fontsize=21)
     plt.legend()
+
+    plt.xlim([-1, 17])
+    #plt.ylim([-1, 0])
+
+    plt.xticks([])
+    plt.yticks([])
     grade_plot_path = os.path.join(save_dir, 'technique_embedding_train.png')
     if os.path.isfile(grade_plot_path) and not args.overwrite:
         raise FileExistsError('File [{}] already exists.'.format(grade_plot_path))
@@ -113,6 +122,12 @@ def main():
         plt.savefig(grade_plot_path)
     #plt.show()
     plt.clf()
+
+    f = plt.figure()
+    f.set_figwidth(20)
+    f.set_figheight(8)
+    #f.set_figwidth(15)
+    #f.set_figheight(10)
 
     plt.scatter(
         embedding_train[:, 0],
@@ -123,7 +138,12 @@ def main():
     plt.gca().set_aspect('equal', 'datalim')
     cbar = plt.colorbar(ticks=[0, 1])
     cbar.ax.set_yticklabels(['low grade', 'high grade'])
+    tick_font_size = 28
+    cbar.ax.tick_params(labelsize=tick_font_size)
     technique_plot_path = os.path.join(save_dir, 'grade_embedding_train.png')
+
+    plt.xticks([])
+    plt.yticks([])
     if os.path.isfile(technique_plot_path) and not args.overwrite:
         raise FileExistsError('File [{}] already exists.'.format(technique_plot_path))
     else:
@@ -135,7 +155,7 @@ def main():
 
     f = plt.figure()
     f.set_figwidth(20)
-    f.set_figheight(15)
+    f.set_figheight(10)
 
     for i in technique_class_to_name.keys():
         color = next(colors)
@@ -150,6 +170,7 @@ def main():
     plt.gca().set_aspect('equal', 'datalim')
     plt.legend()
     grade_plot_path = os.path.join(save_dir, 'technique_embedding_validation.png')
+
     if os.path.isfile(grade_plot_path) and not args.overwrite:
         raise FileExistsError('File [{}] already exists.'.format(grade_plot_path))
     else:

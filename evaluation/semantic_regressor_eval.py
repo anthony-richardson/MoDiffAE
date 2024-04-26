@@ -461,7 +461,10 @@ def main():
     fig_save_path = os.path.join(eval_dir, f"regression_combined_{test_participant}")
     plt.savefig(fig_save_path)
 
-    plt.rc('font', size=10)
+    plt.rc('font', size=12)
+    #plt.rc('font', size=10)
+    plt.rc('xtick', labelsize=10)
+    plt.rc('ytick', labelsize=10)
 
     sns.set(font_scale=1.0)
 
@@ -475,7 +478,8 @@ def main():
                          index=[technique_idx_to_name_short[i] for i in technique_idx_to_name_short.keys()],
                          columns=[technique_idx_to_name_short[i] for i in technique_idx_to_name_short.keys()])
 
-    plt.figure(figsize=(10, 7))
+    #plt.figure(figsize=(10, 7))
+    plt.figure(figsize=(10, 6))
     s = sns.heatmap(df_cm, annot=True, cmap='Blues')
     s.set_xlabel('Predicted technique')
     s.set_ylabel('True technique')
@@ -493,7 +497,8 @@ def main():
                          index=[grade_idx_to_name_short[i] for i in grade_idx_to_name_short.keys()],
                          columns=[grade_idx_to_name_short[i] for i in grade_idx_to_name_short.keys()])
 
-    plt.figure(figsize=(10, 7))
+    #plt.figure(figsize=(10, 7))
+    plt.figure(figsize=(10, 6))
     s = sns.heatmap(df_cm, annot=True, cmap='Blues')
     s.set_xlabel('Predicted grade')
     s.set_ylabel('True grade')
