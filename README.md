@@ -127,5 +127,6 @@ This code is based on a variety of other works. We want to thank the following c
 Special thanks to [Szczęsna et al.](https://www.nature.com/articles/s41597-021-00801-5) for providing the original version of the Kyokushin karate dataset.
 
 ### License
-This code is distributed under the [MIT LICENSE](LICENSE).
+This code is distributed under the [CC-By Attribution 4.0 International Public License](LICENSE).
+
 
