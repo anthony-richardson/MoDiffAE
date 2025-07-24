@@ -51,7 +51,7 @@ python -m training.train --model_type {model_type} --help
 
 ## Training
 There are three models that can be trained. The MoDiffAE core, the semantic regressor and the semantic generator. 
-The core needs to be trained first as the other to models depend on it. 
+The core needs to be trained first as the other two models depend on it. 
 When training the regressor and generator, the core is frozen. 
 
 ### Core 
